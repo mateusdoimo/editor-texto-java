@@ -90,18 +90,19 @@ public class JEditor extends JFrame implements ActionListener{
         
         JMenu itemArq = new JMenu("Arquivo");
         
-        itemArq.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icon/file.png")));
-        itemArq.setText("Arquivo");
-        itemArq.setFocusable(false);
-//        itemArq.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);;
-//        itemArq.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        itemArq.setHorizontalAlignment(SwingConstants.LEFT);
-        itemArq.setBorder(new EmptyBorder(5,5,5,5));
+        
         mb.setBackground(Color.white);
         
         JMenuItem btnNovo = new JMenuItem("Novo");
         JMenuItem btnAbrir = new JMenuItem("Abrir");
         JMenuItem btnSalvar = new JMenuItem("Salvar");
+        
+        
+        btnAbrir.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icon/file.png")));
+        btnAbrir.setText("Arquivo");
+        btnAbrir.setFocusable(false);
+        btnAbrir.setHorizontalAlignment(SwingConstants.LEFT);
+        btnAbrir.setBorder(new EmptyBorder(5,5,5,5));
         
         btnNovo.addActionListener(this);
         btnAbrir.addActionListener(this);
