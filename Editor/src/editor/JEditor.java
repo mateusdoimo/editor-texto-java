@@ -7,6 +7,8 @@ package editor;
 
 import java.awt.Color;
 import java.awt.Event;
+import java.awt.Image;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -17,6 +19,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.net.URL;
 import javax.swing.AbstractAction;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
@@ -48,13 +51,17 @@ import javax.swing.undo.UndoManager;
  *
  * @author DiegoParra
  */
-public class JEditor extends JFrame implements ActionListener{
+public final class JEditor extends JFrame implements ActionListener{
     //Componentes de texto
     private final JTextArea t;
     
+    private final URL caminhoImagem; //icone
+    private final Image iconeTitulo; //icone
+    private final UndoManager undoManager;
     //Frame
     private final JFrame f;
     private final UndoManager undo = new UndoManager();
+    
     //construtor
     public JEditor(){
         
@@ -68,13 +75,14 @@ public class JEditor extends JFrame implements ActionListener{
         
         t = new JTextArea(10,20);
         
-        //
+        
+        // refazer e desfazer
         KeyStroke undoKeyStroke = KeyStroke.getKeyStroke(
             KeyEvent.VK_Z, Event.CTRL_MASK);
         KeyStroke redoKeyStroke = KeyStroke.getKeyStroke(
             KeyEvent.VK_Y, Event.CTRL_MASK);
 
-        UndoManager undoManager = new UndoManager();
+        undoManager = new UndoManager();
         
         Document document = t.getDocument();
         document.addUndoableEditListener(new UndoableEditListener() {
@@ -85,24 +93,18 @@ public class JEditor extends JFrame implements ActionListener{
         });
         //
         
-        
         JMenuBar mb = new JMenuBar();
         
+        //Menu Arquivo
         JMenu itemArq = new JMenu("Arquivo");
-        
-        
-        mb.setBackground(Color.white);
         
         JMenuItem btnNovo = new JMenuItem("Novo");
         JMenuItem btnAbrir = new JMenuItem("Abrir");
         JMenuItem btnSalvar = new JMenuItem("Salvar");
         
-        
-        btnAbrir.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icon/file.png")));
-        btnAbrir.setText("Arquivo");
-        btnAbrir.setFocusable(false);
-        btnAbrir.setHorizontalAlignment(SwingConstants.LEFT);
-        btnAbrir.setBorder(new EmptyBorder(5,5,5,5));
+        visualBtn(btnNovo,"/icon/new.png");
+        visualBtn(btnAbrir,"/icon/file.png");
+        visualBtn(btnSalvar,"/icon/save.png");
         
         btnNovo.addActionListener(this);
         btnAbrir.addActionListener(this);
@@ -111,35 +113,39 @@ public class JEditor extends JFrame implements ActionListener{
         itemArq.add(btnNovo);
         itemArq.add(btnAbrir);
         itemArq.add(btnSalvar);
+        //
         
+        //Menu Editar
         JMenu itemEdit = new JMenu("Editar");
         
-
         JMenuItem btnRecortar = new JMenuItem("Recortar");
         JMenuItem btnCopiar = new JMenuItem("Copiar");
         JMenuItem btnColar = new JMenuItem("Colar");
         JMenuItem btnDesfazer = new JMenuItem("Desfazer");
         JMenuItem btnRefazer = new JMenuItem("Refazer");
         
+        visualBtn(btnRecortar,"/icon/cut.png");
+        visualBtn(btnCopiar,"/icon/copy.png");
+        visualBtn(btnColar,"/icon/paste.png");
+        visualBtn(btnDesfazer,"/icon/undo.png");
+        visualBtn(btnRefazer,"/icon/redo.png");
+        
+        itemEdit.add(btnRefazer);
+        itemEdit.add(btnDesfazer);
+        itemEdit.add(btnRecortar);
+        itemEdit.add(btnCopiar);
+        itemEdit.add(btnColar);
+        
+        
+        
         btnRecortar.addActionListener(this);
         btnCopiar.addActionListener(this);
         btnColar.addActionListener(this);
-//        btnDesfazer.addActionListener(this);
-        //btnRefazer.addActionListener(this);
+        btnDesfazer.addActionListener(this);
+        btnRefazer.addActionListener(this);
         
-        // Add ActionListeners
-        btnDesfazer.addActionListener((ActionEvent e) -> {
-            try {
-                undoManager.undo();
-            } catch (CannotUndoException cue) {}
-        });
-        btnRefazer.addActionListener((ActionEvent e) -> {
-            try {
-                undoManager.redo();
-            } catch (CannotRedoException cre) {}
-        });
+        // Açoes de desfazer e refazer
 
-        // Map undo action
         t.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
                 .put(undoKeyStroke, "undoKeyStroke");
         t.getActionMap().put("undoKeyStroke", new AbstractAction() {
@@ -150,7 +156,7 @@ public class JEditor extends JFrame implements ActionListener{
                  } catch (CannotUndoException cue) {}
             }
         });
-        // Map redo action
+        
         t.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
                 .put(redoKeyStroke, "redoKeyStroke");
         t.getActionMap().put("redoKeyStroke", new AbstractAction() {
@@ -161,22 +167,17 @@ public class JEditor extends JFrame implements ActionListener{
                  } catch (CannotRedoException cre) {}
             }
         });
+        //
         
-        itemEdit.add(btnRecortar);
-        itemEdit.add(btnCopiar);
-        itemEdit.add(btnColar);
-        itemEdit.add(btnDesfazer);
-        itemEdit.add(btnRefazer);
         
         JMenuItem itemFechar = new JMenuItem("Fechar");
-        
         itemFechar.addActionListener(this);
+        
         
         mb.add(itemArq);
         mb.add(itemEdit);
-//        mb.add(itemFechar);
-        
-        
+        mb.add(itemFechar);
+                
         JScrollPane scroll = new JScrollPane (t);
         scroll.setVerticalScrollBarPolicy ( ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS );
         
@@ -190,7 +191,11 @@ public class JEditor extends JFrame implements ActionListener{
         t.setRows(5);
         t.setBorder(new EmptyBorder(10, 10, 10, 10));
         
-        //f.setIconImage(iconeTitulo);
+         //icone
+        caminhoImagem = this.getClass().getClassLoader().getResource("icon/icone.png");
+        iconeTitulo = Toolkit.getDefaultToolkit().getImage(caminhoImagem);
+
+        f.setIconImage(iconeTitulo);
         f.setResizable(false);
         f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         f.setLocationRelativeTo(null);
@@ -210,6 +215,12 @@ public class JEditor extends JFrame implements ActionListener{
         f.setVisible(true);
     }
     
+    public void visualBtn(JMenuItem btn, String icone){
+        btn.setIcon(new javax.swing.ImageIcon(getClass().getResource(icone)));
+        btn.setFocusable(false);
+        btn.setHorizontalAlignment(SwingConstants.LEFT);
+        btn.setBorder(new EmptyBorder(5,5,5,5));
+    }
     public void actionPerformed(ActionEvent e)     { 
         String s = e.getActionCommand(); 
   
@@ -222,6 +233,17 @@ public class JEditor extends JFrame implements ActionListener{
                 break;
             case "Colar":
                 t.paste();
+                break;
+                
+            case "Desfazer":
+                try {
+                    undoManager.undo();
+                } catch (CannotUndoException cue) {}
+                break;
+            case "Refazer":
+                try {
+                    undoManager.redo();
+                } catch (CannotRedoException cre) {}
                 break;
             case "Salvar":
                 {
@@ -297,10 +319,10 @@ public class JEditor extends JFrame implements ActionListener{
                         JOptionPane.showMessageDialog(f, "the user cancelled the operation");
                     break;
                 }
-            case "New":
+            case "Novo":
                 t.setText("");
                 break;
-            case "close":
+            case "Fechar":
                 f.setVisible(false);
                 break; 
             default:
