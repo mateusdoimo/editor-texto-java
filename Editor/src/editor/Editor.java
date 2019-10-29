@@ -16,6 +16,7 @@ public class Editor {
      */
     public static void main(String[] args) {
         // TODO code application logic here
+        JEditor e = new JEditor(); 
     }
     
 }
