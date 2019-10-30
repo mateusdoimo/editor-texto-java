@@ -19,6 +19,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.net.URL;
 import javax.swing.AbstractAction;
 import javax.swing.JComponent;
@@ -35,6 +36,7 @@ import javax.swing.KeyStroke;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
@@ -71,16 +73,14 @@ public final class JEditor extends JFrame implements ActionListener{
             UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
             
             MetalLookAndFeel.setCurrentTheme(new OceanTheme());
-        } catch (Exception e){}
+        } catch (ClassNotFoundException | IllegalAccessException | InstantiationException | UnsupportedLookAndFeelException e){}
         
         t = new JTextArea(10,20);
         
         
         // refazer e desfazer
-        KeyStroke undoKeyStroke = KeyStroke.getKeyStroke(
-            KeyEvent.VK_Z, Event.CTRL_MASK);
-        KeyStroke redoKeyStroke = KeyStroke.getKeyStroke(
-            KeyEvent.VK_Y, Event.CTRL_MASK);
+        KeyStroke undoKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_Z, Event.CTRL_MASK);
+        KeyStroke redoKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_Y, Event.CTRL_MASK);
 
         undoManager = new UndoManager();
         
@@ -135,8 +135,6 @@ public final class JEditor extends JFrame implements ActionListener{
         itemEdit.add(btnRecortar);
         itemEdit.add(btnCopiar);
         itemEdit.add(btnColar);
-        
-        
         
         btnRecortar.addActionListener(this);
         btnCopiar.addActionListener(this);
@@ -204,9 +202,9 @@ public final class JEditor extends JFrame implements ActionListener{
             @Override
             public void windowClosing(WindowEvent e) {
                 super.windowClosing(e); //To change body of generated methods, choose Tools | Templates.
-                int ans = JOptionPane.showConfirmDialog(rootPane, "Save Changes ?", "Confirm", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+                int ans = JOptionPane.showConfirmDialog(rootPane, "Salvar alterações ?", "Confirmar", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
                 if (ans == JOptionPane.YES_OPTION) {
-                    //saveChanges();
+                    salvarArq();
                 }
             }
 
@@ -221,6 +219,40 @@ public final class JEditor extends JFrame implements ActionListener{
         btn.setHorizontalAlignment(SwingConstants.LEFT);
         btn.setBorder(new EmptyBorder(5,5,5,5));
     }
+    
+    public void salvarArq(){
+        // Create an object of JFileChooser class
+        JFileChooser j = new JFileChooser("f:");
+        // Invoke the showsSaveDialog function to show the save dialog
+        int r = j.showSaveDialog(null);
+        if (r == JFileChooser.APPROVE_OPTION) {
+
+            // Set the label to the path of the selected directory
+            File fi = new File(j.getSelectedFile().getAbsolutePath());
+
+            try {
+                // Create a file writer
+                FileWriter wr = new FileWriter(fi, false);
+
+                // Write
+                try ( // Create buffered writer to write
+                        BufferedWriter w = new BufferedWriter(wr)) {
+                    // Write
+                    w.write(t.getText());
+                    
+                    w.flush();
+                }
+            }
+            catch (IOException evt) {
+                JOptionPane.showMessageDialog(f, evt.getMessage());
+            }
+        }
+        //Se a operação for cancelada
+        else
+            JOptionPane.showMessageDialog(f, "Operação cancelada pelo usuário");
+    }
+    
+    @Override
     public void actionPerformed(ActionEvent e)     { 
         String s = e.getActionCommand(); 
   
@@ -246,38 +278,8 @@ public final class JEditor extends JFrame implements ActionListener{
                 } catch (CannotRedoException cre) {}
                 break;
             case "Salvar":
-                {
-                    // Create an object of JFileChooser class
-                    JFileChooser j = new JFileChooser("f:");
-                    // Invoke the showsSaveDialog function to show the save dialog
-                    int r = j.showSaveDialog(null);
-                    if (r == JFileChooser.APPROVE_OPTION) {
-                        
-                        // Set the label to the path of the selected directory
-                        File fi = new File(j.getSelectedFile().getAbsolutePath());
-                        
-                        try {
-                            // Create a file writer
-                            FileWriter wr = new FileWriter(fi, false);
-                            
-                            // Create buffered writer to write
-                            BufferedWriter w = new BufferedWriter(wr);
-                            
-                            // Write
-                            w.write(t.getText());
-                            
-                            w.flush();
-                            w.close();
-                        }
-                        catch (Exception evt) {
-                            JOptionPane.showMessageDialog(f, evt.getMessage());
-                        }
-                    }
-                    //Se a operação for cancelada
-                    else
-                        JOptionPane.showMessageDialog(f, "the user cancelled the operation");
-                    break;
-                }
+                salvarArq();
+                break;
             case "Abrir":
                 {
                     // Create an object of JFileChooser class
@@ -310,13 +312,13 @@ public final class JEditor extends JFrame implements ActionListener{
                             // Set the text
                             t.setText(sl);
                         }
-                        catch (Exception evt) {
+                        catch (IOException evt) {
                             JOptionPane.showMessageDialog(f, evt.getMessage());
                         }
                     }
                     // If the user cancelled the operation
                     else
-                        JOptionPane.showMessageDialog(f, "the user cancelled the operation");
+                        JOptionPane.showMessageDialog(f, "Operação cancelada pelo usuário");
                     break;
                 }
             case "Novo":
