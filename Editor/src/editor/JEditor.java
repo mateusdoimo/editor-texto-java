@@ -85,11 +85,8 @@ public final class JEditor extends JFrame implements ActionListener{
         undoManager = new UndoManager();
         
         Document document = t.getDocument();
-        document.addUndoableEditListener(new UndoableEditListener() {
-            @Override
-            public void undoableEditHappened(UndoableEditEvent e) {
-                undoManager.addEdit(e.getEdit());
-            }
+        document.addUndoableEditListener((UndoableEditEvent e) -> {
+            undoManager.addEdit(e.getEdit());
         });
         //
         
@@ -118,29 +115,33 @@ public final class JEditor extends JFrame implements ActionListener{
         //Menu Editar
         JMenu itemEdit = new JMenu("Editar");
         
-        JMenuItem btnRecortar = new JMenuItem("Recortar");
         JMenuItem btnCopiar = new JMenuItem("Copiar");
         JMenuItem btnColar = new JMenuItem("Colar");
+        JMenuItem btnRecortar = new JMenuItem("Recortar");
         JMenuItem btnDesfazer = new JMenuItem("Desfazer");
         JMenuItem btnRefazer = new JMenuItem("Refazer");
+        JMenuItem btnSelectAll = new JMenuItem("Selecionar tudo");
         
-        visualBtn(btnRecortar,"/icon/cut.png");
         visualBtn(btnCopiar,"/icon/copy.png");
-        visualBtn(btnColar,"/icon/paste.png");
+        visualBtn(btnColar,"/icon/paste.png");        
+        visualBtn(btnRecortar,"/icon/cut.png");
         visualBtn(btnDesfazer,"/icon/undo.png");
         visualBtn(btnRefazer,"/icon/redo.png");
+        visualBtn(btnSelectAll,"/icon/selall.png");
         
-        itemEdit.add(btnRefazer);
-        itemEdit.add(btnDesfazer);
-        itemEdit.add(btnRecortar);
         itemEdit.add(btnCopiar);
         itemEdit.add(btnColar);
+        itemEdit.add(btnRecortar);
+        itemEdit.add(btnDesfazer);
+        itemEdit.add(btnRefazer);
+        itemEdit.add(btnSelectAll);
         
         btnRecortar.addActionListener(this);
         btnCopiar.addActionListener(this);
         btnColar.addActionListener(this);
         btnDesfazer.addActionListener(this);
         btnRefazer.addActionListener(this);
+        btnSelectAll.addActionListener(this);
         
         // Açoes de desfazer e refazer
 
@@ -167,14 +168,8 @@ public final class JEditor extends JFrame implements ActionListener{
         });
         //
         
-        
-        JMenuItem itemFechar = new JMenuItem("Fechar");
-        itemFechar.addActionListener(this);
-        
-        
         mb.add(itemArq);
         mb.add(itemEdit);
-        mb.add(itemFechar);
                 
         JScrollPane scroll = new JScrollPane (t);
         scroll.setVerticalScrollBarPolicy ( ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS );
@@ -201,13 +196,12 @@ public final class JEditor extends JFrame implements ActionListener{
         f.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                super.windowClosing(e); //To change body of generated methods, choose Tools | Templates.
+                super.windowClosing(e);
                 int ans = JOptionPane.showConfirmDialog(rootPane, "Salvar alterações ?", "Confirmar", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
                 if (ans == JOptionPane.YES_OPTION) {
                     salvarArq();
                 }
             }
-
         });
         
         f.setVisible(true);
@@ -221,23 +215,23 @@ public final class JEditor extends JFrame implements ActionListener{
     }
     
     public void salvarArq(){
-        // Create an object of JFileChooser class
+        // Criar um objeto da classe JFileChooser
         JFileChooser j = new JFileChooser("f:");
-        // Invoke the showsSaveDialog function to show the save dialog
+        //Chamar a função para mostrar a caixa Salvar
         int r = j.showSaveDialog(null);
         if (r == JFileChooser.APPROVE_OPTION) {
 
-            // Set the label to the path of the selected directory
+            // Caminho do diretório
             File fi = new File(j.getSelectedFile().getAbsolutePath());
 
             try {
-                // Create a file writer
+                // Escritor do arquivo
                 FileWriter wr = new FileWriter(fi, false);
 
-                // Write
-                try ( // Create buffered writer to write
+                // Escrever
+                try ( // Buffer para escriva
                         BufferedWriter w = new BufferedWriter(wr)) {
-                    // Write
+                    // Escrever
                     w.write(t.getText());
                     
                     w.flush();
@@ -277,46 +271,49 @@ public final class JEditor extends JFrame implements ActionListener{
                     undoManager.redo();
                 } catch (CannotRedoException cre) {}
                 break;
+            case "Selecionar tudo":
+                t.selectAll();
+                break;                
             case "Salvar":
                 salvarArq();
                 break;
             case "Abrir":
                 {
-                    // Create an object of JFileChooser class
+                    // Criar um objeto da classe JFileChooser
                     JFileChooser j = new JFileChooser("f:");
-                    // Invoke the showsOpenDialog function to show the save dialog
+                    //Chamar a função para mostrar a caixa Salvar
                     int r = j.showOpenDialog(null);
-                    // If the user selects a file
+                    // Se o arquivo for selecionado
                     if (r == JFileChooser.APPROVE_OPTION) {
-                        // Set the label to the path of the selected directory
+                        // Caminho do diretório
                         File fi = new File(j.getSelectedFile().getAbsolutePath());
                         
                         try {
                             // String
                             String s1 = "", sl = "";
                             
-                            // File reader
+                            // Leitor do arquivo
                             FileReader fr = new FileReader(fi);
                             
-                            // Buffered reader
+                            // Leitor do buffer
                             BufferedReader br = new BufferedReader(fr);
                             
-                            // Initilize sl
+                            // Inicializando a string
                             sl = br.readLine();
                             
-                            // Take the input from the file
+                            // Entrada do arquivo
                             while ((s1 = br.readLine()) != null) {
                                 sl = sl + "\n" + s1;
                             }
                             
-                            // Set the text
+                            // Texto
                             t.setText(sl);
                         }
                         catch (IOException evt) {
                             JOptionPane.showMessageDialog(f, evt.getMessage());
                         }
                     }
-                    // If the user cancelled the operation
+                    //Se a operação for cancelada
                     else
                         JOptionPane.showMessageDialog(f, "Operação cancelada pelo usuário");
                     break;
@@ -324,9 +321,6 @@ public final class JEditor extends JFrame implements ActionListener{
             case "Novo":
                 t.setText("");
                 break;
-            case "Fechar":
-                f.setVisible(false);
-                break; 
             default:
                 break;
         }
