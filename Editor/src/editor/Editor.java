@@ -5,17 +5,16 @@
  */
 package editor;
 
-/**
- *
- * @author DiegoParra
- */
+/**Classe principal do editor de texto com interface grafica.
+* @author Diego da Silva Parra e Mateus Fernandes Doimo
+* @version 2.0
+*/
 public class Editor {
 
-    /**
-     * @param args the command line arguments
+    /** Metodo do menu princial de criar a interface do editor.
      */
     public static void main(String[] args) {
-        // TODO code application logic here
+        //Criacao da interface do editor
         JEditor e = new JEditor(); 
     }
     

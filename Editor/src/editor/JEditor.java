@@ -49,10 +49,10 @@ import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoManager;
 
-/**
- *
- * @author DiegoParra
- */
+/**Classe com a interface grafica e as funcoes para manipulacao do arquivo e do texto.
+* @author Diego da Silva Parra e Mateus Fernandes Doimo
+* @version 2.0
+*/
 public final class JEditor extends JFrame implements ActionListener{
     //Componentes de texto
     private final JTextArea t;
@@ -64,9 +64,12 @@ public final class JEditor extends JFrame implements ActionListener{
     private final JFrame f;
     private final UndoManager undo = new UndoManager();
     
-    //construtor
+    /** Construtor para criar a interface.
+     *Nela sao criados os itens e seus respectivos botoes bem como sao adicionados os respectivos icones. 
+     * Alem disso, sao especificadas todas as acoes de edicao (copiar, colar, recortar, desfazer, refazer e selecionar tudo) bem como cria-se a area de manipulacao do texto.
+     */
     public JEditor(){
-        
+        //Criação do Frame
         f = new JFrame("Editor de texto");
         
         try{
@@ -75,8 +78,8 @@ public final class JEditor extends JFrame implements ActionListener{
             MetalLookAndFeel.setCurrentTheme(new OceanTheme());
         } catch (ClassNotFoundException | IllegalAccessException | InstantiationException | UnsupportedLookAndFeelException e){}
         
+        //Componente de texto
         t = new JTextArea(10,20);
-        
         
         // refazer e desfazer
         KeyStroke undoKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_Z, Event.CTRL_MASK);
@@ -88,17 +91,19 @@ public final class JEditor extends JFrame implements ActionListener{
         document.addUndoableEditListener((UndoableEditEvent e) -> {
             undoManager.addEdit(e.getEdit());
         });
-        //
-        
+
+        //Barra de menu
         JMenuBar mb = new JMenuBar();
         
         //Menu Arquivo
         JMenu itemArq = new JMenu("Arquivo");
         
+        //Criação dos itens do menu Arquivo
         JMenuItem btnNovo = new JMenuItem("Novo");
         JMenuItem btnAbrir = new JMenuItem("Abrir");
         JMenuItem btnSalvar = new JMenuItem("Salvar");
         
+        //Icones dos botões do menu Arquivo
         visualBtn(btnNovo,"/icon/new.png");
         visualBtn(btnAbrir,"/icon/file.png");
         visualBtn(btnSalvar,"/icon/save.png");
@@ -110,11 +115,11 @@ public final class JEditor extends JFrame implements ActionListener{
         itemArq.add(btnNovo);
         itemArq.add(btnAbrir);
         itemArq.add(btnSalvar);
-        //
         
         //Menu Editar
         JMenu itemEdit = new JMenu("Editar");
         
+        //Criação dos itens do menu Editar
         JMenuItem btnCopiar = new JMenuItem("Copiar");
         JMenuItem btnColar = new JMenuItem("Colar");
         JMenuItem btnRecortar = new JMenuItem("Recortar");
@@ -122,6 +127,7 @@ public final class JEditor extends JFrame implements ActionListener{
         JMenuItem btnRefazer = new JMenuItem("Refazer");
         JMenuItem btnSelectAll = new JMenuItem("Selecionar tudo");
         
+        //Icones dos botões do menu Editar
         visualBtn(btnCopiar,"/icon/copy.png");
         visualBtn(btnColar,"/icon/paste.png");        
         visualBtn(btnRecortar,"/icon/cut.png");
@@ -166,8 +172,8 @@ public final class JEditor extends JFrame implements ActionListener{
                  } catch (CannotRedoException cre) {}
             }
         });
-        //
         
+        //Inserindo os itens criados na barra de menu
         mb.add(itemArq);
         mb.add(itemEdit);
                 
@@ -206,7 +212,9 @@ public final class JEditor extends JFrame implements ActionListener{
         
         f.setVisible(true);
     }
-    
+
+    /** Metodo para inserir os icones nos botoes do editor.
+     */       
     public void visualBtn(JMenuItem btn, String icone){
         btn.setIcon(new javax.swing.ImageIcon(getClass().getResource(icone)));
         btn.setFocusable(false);
@@ -214,6 +222,9 @@ public final class JEditor extends JFrame implements ActionListener{
         btn.setBorder(new EmptyBorder(5,5,5,5));
     }
     
+    /** Metodo para salvar o arquivo no disco.
+     * Nela cria-se a caixa Salvar com a definicao do caminho do diretorio em que o arquivo sera gravado.
+     */
     public void salvarArq(){
         // Criar um objeto da classe JFileChooser
         JFileChooser j = new JFileChooser("f:");
@@ -246,6 +257,8 @@ public final class JEditor extends JFrame implements ActionListener{
             JOptionPane.showMessageDialog(f, "Operação cancelada pelo usuário");
     }
     
+    /** Metodo que especifica e realiza as acoes de cada botao da barra de menu.
+     */
     @Override
     public void actionPerformed(ActionEvent e)     { 
         String s = e.getActionCommand(); 
